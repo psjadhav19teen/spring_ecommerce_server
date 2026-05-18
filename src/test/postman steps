@@ -1,0 +1,369 @@
+SELECT * FROM ecomm.users;
+DESC ecomm.users;
+insert into ecomm.users(email,password,role,seller_status)
+values ('admin@gmail.com','$2a$12$JKZUbDOhYGNoNSgJxGSMweHF3WNyJdvVzZUO386WLXZyaKXsygnP2','ADMIN','NONE');
+
+STEP 1️⃣ Register USER (Buyer)
+Endpoint
+POST http://localhost:8080/api/auth/register
+Authorization ❌ No Auth
+Body->json
+{
+  "email": "raj@gmail.com",
+  "password": "raj"
+}
+
+STEP 2️⃣ Login USER
+Endpoint
+POST /api/auth/login
+Authorization ❌ No Auth
+Body->json
+{
+  "email": "raj@gmail.com",
+  "password": "raj"
+}
+{"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyYWpAZ21haWwuY29tIiwicm9sZSI6IlJPTEVfVVNFUiIsImlhdCI6MTc3MDA1OTk1MSwiZXhwIjoxNzcwMDk1OTUxfQ.OvH-3R5p3WiznTNoyugD1DnTV32Eyf-_2y9f67Dg5eA","role":"USER"}
+
+STEP 3️⃣ Request Seller Access (USER → SELLER REQUEST)
+Endpoint
+POST http://localhost:8080/api/seller/request
+Authorization
+✔ Bearer Token
+
+
+STEP 4️⃣ Login as ADMIN
+Admin must already exist in DB
+Endpoint
+POST http://localhost:8080/api/auth/login
+Authorization
+❌ No Auth
+Body
+{
+  "email": "admin@gmail.com",
+  "password": "admin"
+}
+{
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBnbWFpbC5jb20iLCJyb2xlIjoiUk9MRV9BRE1JTiIsImlhdCI6MTc3MDA2MDIyNywiZXhwIjoxNzcwMDk2MjI3fQ.BjHm3z6JFqM6hBJ2Y24Imx32UO7IHU9XTbNejBcl-GM",
+    "role": "ADMIN"
+}
+
+
+STEP 5️⃣ ADMIN Approves Seller
+Endpoint
+POST http://localhost:8080/api/admin/approve-seller/{userId}
+
+
+Example:
+
+POST /api/admin/approve-seller/2
+
+STEP 6️⃣ Seller LOGIN AGAIN (IMPORTANT)
+
+JWT role updates only after re-login
+
+Endpoint
+POST http://localhost:8080/api/auth/login
+
+Body
+{
+  "email": "raj@gmail.com",
+  "password": "raj"
+}
+{
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyYWpAZ21haWwuY29tIiwicm9sZSI6IlJPTEVfU0VMTEVSIiwiaWF0IjoxNzcwMDYwNDY4LCJleHAiOjE3NzAwOTY0Njh9.-FyShDbnV9lAbzYFeNR2YMyQ5NG9256S2yUiTJViMnI",
+    "role": "SELLER"
+}
+
+STEP 7️⃣ SELLER Adds Product
+Endpoint
+POST http://localhost:8080/api/products
+
+Authorization
+
+✔ Bearer Token
+{
+  "name": "Dog Food Premium",
+  "price": 999.99,
+  "category": "Pet Food",
+  "subcategory": "Dog",
+  "description": "High protein food for dogs",
+  "imageUrl": "https://img.com/dogfood.jpg"
+}
+
+STEP 8️⃣ PUBLIC – View Products (NO LOGIN)
+All products
+GET /api/products
+
+Category filter
+GET /api/products?category=Pet Food
+
+Category + price
+GET /api/products?category=Pet Food&minPrice=500&maxPrice=2000
+
+Category + subcategory + price
+GET /api/products?category=Pet Food&subcategory=Dog&minPrice=500&maxPrice=2000
+
+Pagination + sorting
+GET /api/products?page=0&size=5&sortBy=price&direction=desc
+
+Price Range
+GET /api/products?minPrice=5000&maxPrice=60000
+
+🔍 All Combined
+GET /api/products?category=Electronics&subCategory=Laptops&minPrice=50000&maxPrice=70000
+
+STEP 9️⃣ SELLER Updates Product
+Endpoint
+PUT /api/products/1
+
+Authorization
+
+✔ Bearer Token
+
+SELLER_TOKEN
+
+{
+  "name": "Dog Food Ultra",
+  "price": 1299.99,
+  "category": "Pet Food",
+  "subcategory": "Dog",
+  "description": "Ultra premium dog food",
+  "imageUrl": "https://img.com/dogfood2.jpg"
+}
+{
+  "name": "iPhone 15",
+  "category": "Electronics",
+  "subCategory": "Mobiles",
+  "description": "Apple iPhone 15 with A16 chip",
+  "price": 79999,
+  "imageUrl": "https://example.com/iphone15.jpg"
+}
+{
+  "name": "Samsung Galaxy S23",
+  "category": "Electronics",
+  "subCategory": "Mobiles",
+  "description": "Samsung flagship smartphone",
+  "price": 69999,
+  "imageUrl": "https://example.com/s23.jpg"
+}
+{
+  "name": "Dell Inspiron 15",
+  "category": "Electronics",
+  "subCategory": "Laptops",
+  "description": "15-inch laptop for office use",
+  "price": 55999,
+  "imageUrl": "https://example.com/dell.jpg"
+}
+{
+  "name": "HP Pavilion",
+  "category": "Electronics",
+  "subCategory": "Laptops",
+  "description": "HP Pavilion laptop with SSD",
+  "price": 62999,
+  "imageUrl": "https://example.com/hp.jpg"
+}
+{
+  "name": "Sony Bravia 55 TV",
+  "category": "Electronics",
+  "subCategory": "Television",
+  "description": "55 inch 4K Smart TV",
+  "price": 74999,
+  "imageUrl": "https://example.com/sony-tv.jpg"
+}
+
+
+STEP 🔟 SELLER / ADMIN Deletes Product
+Endpoint
+DELETE /api/products/1
+
+Authorization
+
+✔ Bearer Token
+
+CART → 📦 ORDER → 💳 PAYMENT
+POSTMAN STEP-BY-STEP FLOW
+
+Base URL:
+
+http://localhost:8080
+
+
+Tokens needed:
+
+USER_TOKEN (buyer)
+
+SELLER_TOKEN (already used earlier, not needed here)
+
+ADMIN_TOKEN (not needed here)
+
+🟢 STEP 1️⃣ Login as USER (Buyer)
+POST /api/auth/login
+
+
+Body:
+
+{
+  "email": "user@gmail.com",
+  "password": "user"
+}
+✅ Save JWT as:
+{
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGdtYWlsLmNvbSIsInJvbGUiOiJST0xFX1VTRVIiLCJpYXQiOjE3NzAwNjE2NDUsImV4cCI6MTc3MDA5NzY0NX0.VGZViOAPhhc75GZAvhHPurH8F_UKtUhnX-YKN4-O6nU",
+    "role": "USER"
+}
+
+USER_TOKEN
+
+🛒 STEP 2️⃣ Add Product to Cart
+Endpoint
+POST /api/cart/add/{productId}
+
+
+Example:
+
+POST /api/cart/add/1
+
+Authorization
+Bearer USER_TOKEN
+
+Body
+{
+  "quantity": 2
+}
+
+✅ Response
+{
+  "id": 10,
+  "product": {
+    "id": 1,
+    "name": "Dog Food Premium"
+  },
+  "quantity": 2,
+  "price": 1999.98
+}
+
+🛒 STEP 3️⃣ View Cart Items
+GET /api/cart
+
+
+Authorization:
+
+Bearer USER_TOKEN
+
+✅ Response
+[
+  {
+    "productName": "Dog Food Premium",
+    "quantity": 2,
+    "price": 1999.98
+  }
+]
+
+🛒 STEP 4️⃣ Update Cart Item Quantity
+PUT /api/cart/update/{cartItemId}
+
+
+Example:
+
+PUT /api/cart/update/10
+
+
+Authorization:
+
+Bearer USER_TOKEN
+
+
+Body:
+
+{
+  "quantity": 3
+}
+
+🛒 STEP 5️⃣ Remove Item from Cart
+DELETE /api/cart/remove/{cartItemId}
+
+
+Authorization:
+
+Bearer USER_TOKEN
+
+📦 STEP 6️⃣ Place Order (From Cart)
+POST /api/orders/place
+
+
+Authorization:
+
+Bearer USER_TOKEN
+
+
+Body:
+❌ No body
+
+✅ Response
+{
+  "orderId": 5,
+  "status": "CREATED",
+  "totalAmount": 2999.97,
+  "items": [
+    {
+      "productName": "Dog Food Premium",
+      "quantity": 3,
+      "price": 2999.97
+    }
+  ]
+}
+
+
+📌 Cart will be auto-cleared
+
+💳 STEP 7️⃣ Make Payment for Order
+POST /api/payments/{orderId}
+
+
+Example:
+
+POST /api/payments/5
+
+
+Authorization:
+
+Bearer USER_TOKEN
+
+
+Body:
+❌ No body
+
+✅ Response
+{
+  "paymentId": 7,
+  "status": "SUCCESS",
+  "orderId": 5,
+  "paidAmount": 2999.97,
+  "paymentDate": "2026-02-02T10:30:12"
+}
+
+📦 STEP 8️⃣ View My Orders (User)
+GET /api/orders/my
+
+
+Authorization:
+
+Bearer USER_TOKEN
+
+✅ Response
+[
+  {
+    "orderId": 5,
+    "status": "PAID",
+    "totalAmount": 2999.97
+  }
+]
+
+🔒 SECURITY RULES (IMPORTANT)
+Action	Role
+Add to cart	USER
+Place order	USER
+Pay order	USER
+View orders	USER
+Add product	SELLER
+Approve seller	ADMIN
